@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.huwhy.zhaojun.dao.UserDao">
+
+  <sql id="COLUMNS">
+    id, username, password, locked, modified, created
+  </sql>
+
+  <insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="User">
+    insert into users(
+    <include refid="COLUMNS"/>
+    ) VALUES (
+    #{id}, #{username}, #{password}, #{locked}, now(), now()
+    ) on duplicate key update
+    enable=VALUES(enable), locked=VALUES(locked), modified=VALUES(modified)
+  </insert>
+
+  <select id="get" parameterType="java.lang.Long" resultType="User">
+    select
+    <include refid="COLUMNS"/>
+    from users where id=#{id}
+  </select>
+
+  <select id="getByName" parameterType="java.lang.String" resultType="User">
+    select
+    <include refid="COLUMNS"/>
+    from users where username=#{username}
+  </select>
+
+  <update id="lock" parameterType="java.lang.Long">
+    update users set locked=1 where id=#{id}
+  </update>
+
+  <select id="findPaging" resultType="User"
+          parameterType="com.comblife.interfaces.Term">
+    select
+    <include refid="COLUMNS"/>
+    from users
+    <where>
+      <if test="username != null">
+        username like '${username}%'
+      </if>
+      <if test="locked != null">
+        and locked=#{locked}
+      </if>
+    </where>
+  </select>
+
+</mapper>
